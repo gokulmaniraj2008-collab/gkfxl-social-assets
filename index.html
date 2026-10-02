@@ -9,10 +9,10 @@
     :root { --bg:#f4f1ea; --ink:#111; --muted:#6f6b64; }
     * { box-sizing:border-box; }
     html { scroll-behavior:smooth; }
-    body { margin:0; background:var(--bg); color:var(--ink); font-family:Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    body { margin:0; background:var(--bg); color:var(--ink); font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
     .intro { min-height:100svh; display:grid; place-items:center; padding:48px 24px; text-align:center; }
     .intro-inner { max-width:760px; }
-    .eyebrow { display:inline-flex; gap:8px; align-items:center; padding:8px 12px; border:1px solid #d8d2c8; border-radius:999px; font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); background:rgba(255,255,255,.35); }
+    .eyebrow { display:inline-flex; padding:8px 12px; border:1px solid #d8d2c8; border-radius:999px; font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); background:rgba(255,255,255,.35); }
     h1 { font-size:clamp(48px,9vw,112px); line-height:.92; letter-spacing:-.065em; margin:24px 0 18px; font-weight:750; }
     .intro p { margin:0 auto; max-width:580px; color:var(--muted); font-size:clamp(16px,2vw,20px); line-height:1.55; }
     .scroll-hint { margin-top:48px; color:var(--muted); font-size:13px; letter-spacing:.08em; text-transform:uppercase; }
@@ -24,7 +24,7 @@
     .copy p { color:var(--muted); font-size:16px; line-height:1.6; margin:0; }
     .progress { position:absolute; right:28px; top:50%; transform:translateY(-50%); width:3px; height:96px; border-radius:99px; background:#d6d0c7; overflow:hidden; z-index:3; }
     .progress i { display:block; width:100%; height:100%; background:#111; transform:scaleY(0); transform-origin:top; }
-    .loader { position:absolute; inset:0; display:grid; place-items:center; z-index:5; background:var(--bg); transition:opacity .5s ease, visibility .5s ease; }
+    .loader { position:absolute; inset:0; display:grid; place-items:center; z-index:5; background:var(--bg); transition:opacity .5s ease,visibility .5s ease; }
     .loader.hidden { opacity:0; visibility:hidden; }
     .loader-card { text-align:center; }
     .spinner { width:32px; height:32px; border:2px solid #d5d0c7; border-top-color:#111; border-radius:50%; animation:spin .8s linear infinite; margin:0 auto 14px; }
@@ -81,7 +81,7 @@
 
   <script>
     const FRAME_COUNT = 40;
-    const FRAME_PATH = index => `frames/frame_${String(index).padStart(6, '0')}.jpg`;
+    const FRAME_PATH = index => `frames_web/frame_${String(index).padStart(4, '0')}.jpg`;
     const images = Array.from({ length: FRAME_COUNT }, () => new Image());
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d', { alpha: false });
@@ -90,17 +90,16 @@
     const loaderText = document.getElementById('loaderText');
     const progressBar = document.getElementById('progressBar');
     let loaded = 0;
-    let currentFrame = -1;
+    let currentFrame = 0;
     let targetFrame = 0;
     let raf = 0;
-    let ready = false;
 
     function resize() {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       canvas.width = Math.floor(canvas.clientWidth * dpr);
       canvas.height = Math.floor(canvas.clientHeight * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      if (currentFrame >= 0) draw(currentFrame);
+      draw(Math.round(currentFrame));
     }
 
     function draw(index) {
@@ -113,24 +112,20 @@
       const scale = Math.min(w / img.naturalWidth, h / img.naturalHeight);
       const dw = img.naturalWidth * scale;
       const dh = img.naturalHeight * scale;
-      const x = (w - dw) / 2;
-      const y = (h - dh) / 2;
-      ctx.drawImage(img, x, y, dw, dh);
+      ctx.drawImage(img, (w - dw) / 2, (h - dh) / 2, dw, dh);
     }
 
     function render() {
       raf = 0;
-      if (Math.abs(targetFrame - currentFrame) < 0.02) return;
-      currentFrame += (targetFrame - currentFrame) * 0.28;
+      currentFrame += (targetFrame - currentFrame) * 0.22;
       const frame = Math.max(0, Math.min(FRAME_COUNT - 1, Math.round(currentFrame)));
-      if (frame !== Math.round(currentFrame - (targetFrame - currentFrame) * 0.28)) draw(frame);
       draw(frame);
-      if (Math.abs(targetFrame - currentFrame) > 0.02) raf = requestAnimationFrame(render);
+      if (Math.abs(targetFrame - currentFrame) > 0.03) raf = requestAnimationFrame(render);
     }
 
     function updateFromScroll() {
       const rect = sequence.getBoundingClientRect();
-      const travel = sequence.offsetHeight - window.innerHeight;
+      const travel = Math.max(1, sequence.offsetHeight - window.innerHeight);
       const progress = Math.max(0, Math.min(1, -rect.top / travel));
       targetFrame = progress * (FRAME_COUNT - 1);
       progressBar.style.transform = `scaleY(${progress})`;
@@ -143,7 +138,6 @@
           loaded++;
           loaderText.textContent = `Loading frames… ${loaded} / ${FRAME_COUNT}`;
           if (loaded === FRAME_COUNT) {
-            ready = true;
             loader.classList.add('hidden');
             currentFrame = 0;
             targetFrame = 0;
