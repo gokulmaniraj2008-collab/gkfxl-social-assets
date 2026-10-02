@@ -2,79 +2,143 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#f4f1ea">
-  <title>Scroll Sequence — GKFXL Demo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f5f3ee">
+  <meta name="description" content="GKFXL cinematic scroll sequence demo.">
+  <title>GKFXL — Cinematic Scroll Demo</title>
   <style>
-    :root { --bg:#f4f1ea; --ink:#111; --muted:#6f6b64; }
-    * { box-sizing:border-box; }
-    html { scroll-behavior:smooth; }
-    body { margin:0; background:var(--bg); color:var(--ink); font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
-    .intro { min-height:100svh; display:grid; place-items:center; padding:48px 24px; text-align:center; }
-    .intro-inner { max-width:760px; }
-    .eyebrow { display:inline-flex; padding:8px 12px; border:1px solid #d8d2c8; border-radius:999px; font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); background:rgba(255,255,255,.35); }
-    h1 { font-size:clamp(48px,9vw,112px); line-height:.92; letter-spacing:-.065em; margin:24px 0 18px; font-weight:750; }
-    .intro p { margin:0 auto; max-width:580px; color:var(--muted); font-size:clamp(16px,2vw,20px); line-height:1.55; }
-    .scroll-hint { margin-top:48px; color:var(--muted); font-size:13px; letter-spacing:.08em; text-transform:uppercase; }
-    .sequence { position:relative; height:520vh; }
-    .sticky { position:sticky; top:0; height:100svh; overflow:hidden; display:grid; place-items:center; }
-    canvas { width:100%; height:100%; display:block; }
-    .copy { position:absolute; z-index:2; left:clamp(24px,7vw,110px); top:50%; transform:translateY(-50%); width:min(390px,42vw); pointer-events:none; }
-    .copy h2 { font-size:clamp(38px,5vw,72px); line-height:.96; letter-spacing:-.055em; margin:0 0 18px; }
-    .copy p { color:var(--muted); font-size:16px; line-height:1.6; margin:0; }
-    .progress { position:absolute; right:28px; top:50%; transform:translateY(-50%); width:3px; height:96px; border-radius:99px; background:#d6d0c7; overflow:hidden; z-index:3; }
-    .progress i { display:block; width:100%; height:100%; background:#111; transform:scaleY(0); transform-origin:top; }
-    .loader { position:absolute; inset:0; display:grid; place-items:center; z-index:5; background:var(--bg); transition:opacity .5s ease,visibility .5s ease; }
-    .loader.hidden { opacity:0; visibility:hidden; }
-    .loader-card { text-align:center; }
-    .spinner { width:32px; height:32px; border:2px solid #d5d0c7; border-top-color:#111; border-radius:50%; animation:spin .8s linear infinite; margin:0 auto 14px; }
-    @keyframes spin { to { transform:rotate(360deg); } }
-    .loader small { color:var(--muted); }
-    .outro { min-height:80svh; display:grid; place-items:center; padding:48px 24px; text-align:center; }
-    .outro h2 { font-size:clamp(42px,7vw,90px); letter-spacing:-.06em; margin:0 0 18px; }
-    .outro p { color:var(--muted); max-width:600px; line-height:1.6; margin:auto; }
-    @media (max-width:800px) {
-      .sequence { height:420vh; }
-      .copy { left:24px; right:24px; top:auto; bottom:54px; transform:none; width:auto; text-align:center; }
-      .copy p { font-size:14px; }
-      .copy h2 { font-size:38px; }
-      .progress { right:16px; height:70px; }
+    :root{--bg:#f5f3ee;--ink:#11110f;--muted:#716e67;--line:rgba(17,17,15,.12);--card:rgba(255,255,255,.58)}
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth;background:var(--bg)}
+    body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+    a{color:inherit;text-decoration:none}
+    button{font:inherit}
+    .topbar{position:fixed;z-index:20;top:0;left:0;right:0;height:76px;padding:0 clamp(18px,4vw,56px);display:flex;align-items:center;justify-content:space-between;pointer-events:none}
+    .brand,.nav-pill{pointer-events:auto}
+    .brand{font-weight:800;letter-spacing:-.05em;font-size:20px}
+    .brand span{font-weight:450;color:var(--muted)}
+    .nav-pill{display:flex;align-items:center;gap:8px;padding:8px 10px 8px 14px;border:1px solid var(--line);border-radius:999px;background:rgba(245,243,238,.72);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);font-size:12px;color:var(--muted)}
+    .nav-dot{width:7px;height:7px;border-radius:50%;background:#111}
+
+    .hero{min-height:100svh;display:grid;place-items:center;padding:120px 24px 70px;text-align:center;position:relative;overflow:hidden}
+    .hero:before{content:"";position:absolute;width:min(72vw,900px);height:min(72vw,900px);border-radius:50%;background:radial-gradient(circle,rgba(0,0,0,.07),transparent 67%);filter:blur(8px);pointer-events:none}
+    .hero-inner{position:relative;z-index:1;max-width:920px}
+    .eyebrow{display:inline-flex;align-items:center;gap:9px;padding:9px 13px;border:1px solid var(--line);border-radius:999px;background:var(--card);backdrop-filter:blur(12px);font-size:11px;font-weight:650;letter-spacing:.13em;text-transform:uppercase;color:var(--muted)}
+    .eyebrow i{display:block;width:6px;height:6px;border-radius:50%;background:#111}
+    h1{font-size:clamp(58px,10.5vw,148px);line-height:.84;letter-spacing:-.075em;margin:28px 0 25px;font-weight:780}
+    .hero p{max-width:590px;margin:0 auto;color:var(--muted);font-size:clamp(16px,1.7vw,20px);line-height:1.55}
+    .hero-actions{margin-top:34px;display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
+    .btn{border:1px solid var(--ink);border-radius:999px;padding:13px 19px;background:var(--ink);color:#fff;font-size:13px;font-weight:650;cursor:pointer;transition:transform .2s ease,opacity .2s ease}
+    .btn.secondary{background:transparent;color:var(--ink);border-color:var(--line)}
+    .btn:hover{transform:translateY(-2px)}
+    .scroll-cue{margin-top:55px;color:var(--muted);font-size:11px;letter-spacing:.15em;text-transform:uppercase;display:flex;justify-content:center;align-items:center;gap:10px}
+    .scroll-cue b{display:block;width:34px;height:1px;background:var(--muted)}
+
+    .sequence{position:relative;height:560vh}
+    .sticky{position:sticky;top:0;height:100svh;overflow:hidden;display:grid;place-items:center;background:var(--bg)}
+    .sticky:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 58% 50%,rgba(255,255,255,.88),transparent 48%);pointer-events:none}
+    canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+    .sequence-copy{position:absolute;z-index:4;left:clamp(24px,7vw,110px);top:50%;transform:translateY(-50%);width:min(380px,34vw);pointer-events:none}
+    .sequence-copy .kicker{font-size:11px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:16px}
+    .sequence-copy h2{font-size:clamp(44px,5.8vw,84px);line-height:.9;letter-spacing:-.065em;margin:0 0 20px;font-weight:760}
+    .sequence-copy p{margin:0;color:var(--muted);font-size:16px;line-height:1.6;max-width:330px}
+    .sequence-copy .mini{margin-top:26px;font-size:12px;color:var(--muted);display:flex;align-items:center;gap:8px}
+    .mini span{width:26px;height:1px;background:currentColor}
+    .progress-wrap{position:absolute;right:clamp(18px,4vw,56px);top:50%;transform:translateY(-50%);z-index:5;display:flex;flex-direction:column;align-items:center;gap:10px}
+    .progress{width:2px;height:105px;border-radius:99px;background:rgba(17,17,15,.14);overflow:hidden}
+    .progress i{display:block;width:100%;height:100%;background:#111;transform:scaleY(0);transform-origin:top}
+    .progress-label{font-size:9px;color:var(--muted);writing-mode:vertical-rl;letter-spacing:.12em}
+
+    .loader{position:absolute;inset:0;display:grid;place-items:center;z-index:10;background:var(--bg);transition:opacity .6s ease,visibility .6s ease}
+    .loader.hidden{opacity:0;visibility:hidden;pointer-events:none}
+    .loader-card{text-align:center}
+    .spinner{width:30px;height:30px;border:1.5px solid #d5d1c9;border-top-color:#111;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 14px}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .loader small{font-size:12px;color:var(--muted)}
+
+    .outro{min-height:88svh;display:grid;place-items:center;padding:90px 24px;text-align:center}
+    .outro-inner{max-width:760px}
+    .outro .eyebrow{margin-bottom:25px}
+    .outro h2{font-size:clamp(48px,8vw,110px);line-height:.88;letter-spacing:-.07em;margin:0 0 22px}
+    .outro p{max-width:580px;margin:0 auto;color:var(--muted);line-height:1.6;font-size:16px}
+    .footer{margin-top:55px;color:var(--muted);font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+
+    @media (max-width:900px){
+      .sequence{height:470vh}
+      .sequence-copy{left:24px;right:24px;top:auto;bottom:46px;transform:none;width:auto;text-align:center}
+      .sequence-copy p{max-width:440px;margin:auto;font-size:14px}
+      .sequence-copy .kicker{margin-bottom:10px}
+      .sequence-copy h2{font-size:clamp(40px,12vw,58px);margin-bottom:12px}
+      .sequence-copy .mini{display:none}
+      .progress-wrap{right:15px}
+      .progress{height:72px}
     }
-    @media (prefers-reduced-motion:reduce) { html { scroll-behavior:auto; } }
+    @media (max-width:600px){
+      .topbar{height:64px}
+      .brand{font-size:18px}
+      .nav-pill{font-size:10px;padding:7px 10px}
+      .hero{padding-top:95px}
+      h1{font-size:clamp(55px,17vw,90px)}
+      .hero p{font-size:15px}
+      .hero-actions{margin-top:27px}
+      .btn{padding:12px 16px}
+      .sequence{height:430vh}
+      .sticky:before{background:radial-gradient(circle at 50% 42%,rgba(255,255,255,.9),transparent 55%)}
+      .sequence-copy{bottom:34px}
+      .sequence-copy p{font-size:13px;line-height:1.45}
+      .outro{min-height:75svh}
+    }
+    @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.btn{transition:none}.spinner{animation:none}.sequence{height:100svh}}
   </style>
 </head>
 <body>
-  <main>
-    <section class="intro">
-      <div class="intro-inner">
-        <span class="eyebrow">GKFXL · Scroll Sequence Demo</span>
-        <h1>Scroll.<br>Watch it move.</h1>
-        <p>A 40-frame image sequence controlled directly by your scroll position. No video element — just a responsive canvas and your extracted frames.</p>
-        <div class="scroll-hint">↓ Scroll to explore</div>
+  <header class="topbar">
+    <a class="brand" href="#top">GKFXL <span>/ studio</span></a>
+    <div class="nav-pill"><i class="nav-dot"></i> 40-frame scroll sequence</div>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div class="hero-inner">
+        <span class="eyebrow"><i></i> Cinematic web motion</span>
+        <h1>Make scroll<br>feel alive.</h1>
+        <p>Turn a simple product sequence into a cinematic interaction. Scroll to control every frame, with smooth motion built for modern mobile and desktop screens.</p>
+        <div class="hero-actions">
+          <a class="btn" href="#sequence">Explore sequence ↓</a>
+          <a class="btn secondary" href="#about">How it works</a>
+        </div>
+        <div class="scroll-cue"><b></b> Scroll to begin <b></b></div>
       </div>
     </section>
 
-    <section class="sequence" id="sequence">
+    <section class="sequence" id="sequence" aria-label="Cinematic product sequence">
       <div class="sticky">
-        <canvas id="canvas" aria-label="Scroll-driven product animation"></canvas>
-        <div class="copy">
-          <h2>Designed to move.</h2>
-          <p>The camera follows the laptop through the sequence as you scroll. Scroll back up to reverse the motion.</p>
+        <canvas id="canvas" aria-label="Scroll-driven laptop product animation"></canvas>
+        <div class="sequence-copy">
+          <div class="kicker">Frame by frame</div>
+          <h2>Designed<br>to move.</h2>
+          <p>The laptop rotates through a 40-frame sequence as your scroll becomes the timeline. Scroll back up to reverse it.</p>
+          <div class="mini"><span></span> Drag the page to control the motion</div>
         </div>
-        <div class="progress"><i id="progressBar"></i></div>
+        <div class="progress-wrap" aria-hidden="true">
+          <div class="progress"><i id="progressBar"></i></div>
+          <div class="progress-label" id="progressLabel">01 / 40</div>
+        </div>
         <div class="loader" id="loader">
           <div class="loader-card">
             <div class="spinner"></div>
-            <small id="loaderText">Loading frames… 0 / 40</small>
+            <small id="loaderText">Preparing sequence…</small>
           </div>
         </div>
       </div>
     </section>
 
-    <section class="outro">
-      <div>
-        <h2>That’s the demo.</h2>
-        <p>This is the same technique you can drop into a premium landing page: generate the motion, extract frames, then let scroll control the visual.</p>
+    <section class="outro" id="about">
+      <div class="outro-inner">
+        <span class="eyebrow"><i></i> The technique</span>
+        <h2>One sequence.<br>Endless control.</h2>
+        <p>Generate a reference image, create the motion, extract the video into frames, then let the browser map scroll progress to the exact frame. The result feels like a premium product film without using a video element.</p>
+        <div class="footer">GKFXL Social Assets · Demo 01</div>
       </div>
     </section>
   </main>
@@ -82,77 +146,90 @@
   <script>
     const FRAME_COUNT = 40;
     const FRAME_PATH = index => `frames_web/frame_${String(index).padStart(4, '0')}.jpg`;
-    const images = Array.from({ length: FRAME_COUNT }, () => new Image());
+    const images = Array.from({length: FRAME_COUNT}, () => new Image());
     const canvas = document.getElementById('canvas');
-    const ctx = canvas.getContext('2d', { alpha: false });
+    const ctx = canvas.getContext('2d', {alpha:false});
     const sequence = document.getElementById('sequence');
     const loader = document.getElementById('loader');
     const loaderText = document.getElementById('loaderText');
     const progressBar = document.getElementById('progressBar');
+    const progressLabel = document.getElementById('progressLabel');
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     let loaded = 0;
     let currentFrame = 0;
     let targetFrame = 0;
     let raf = 0;
 
-    function resize() {
+    function resize(){
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      canvas.width = Math.floor(canvas.clientWidth * dpr);
-      canvas.height = Math.floor(canvas.clientHeight * dpr);
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      canvas.width = Math.max(1, Math.floor(canvas.clientWidth * dpr));
+      canvas.height = Math.max(1, Math.floor(canvas.clientHeight * dpr));
+      ctx.setTransform(dpr,0,0,dpr,0,0);
       draw(Math.round(currentFrame));
     }
 
-    function draw(index) {
+    function draw(index){
       const img = images[index];
-      if (!img || !img.complete || !img.naturalWidth) return;
-      const w = canvas.clientWidth;
-      const h = canvas.clientHeight;
-      ctx.fillStyle = '#f4f1ea';
-      ctx.fillRect(0, 0, w, h);
-      const scale = Math.min(w / img.naturalWidth, h / img.naturalHeight);
-      const dw = img.naturalWidth * scale;
-      const dh = img.naturalHeight * scale;
-      ctx.drawImage(img, (w - dw) / 2, (h - dh) / 2, dw, dh);
+      if(!img || !img.complete || !img.naturalWidth) return;
+      const w = canvas.clientWidth, h = canvas.clientHeight;
+      ctx.fillStyle = '#f5f3ee';
+      ctx.fillRect(0,0,w,h);
+      const scale = Math.min(w/img.naturalWidth, h/img.naturalHeight);
+      const dw = img.naturalWidth * scale, dh = img.naturalHeight * scale;
+      ctx.drawImage(img,(w-dw)/2,(h-dh)/2,dw,dh);
     }
 
-    function render() {
+    function render(){
       raf = 0;
-      currentFrame += (targetFrame - currentFrame) * 0.22;
-      const frame = Math.max(0, Math.min(FRAME_COUNT - 1, Math.round(currentFrame)));
+      if(reducedMotion){ currentFrame = targetFrame; }
+      else { currentFrame += (targetFrame-currentFrame)*0.18; }
+      const frame = Math.max(0,Math.min(FRAME_COUNT-1,Math.round(currentFrame)));
       draw(frame);
-      if (Math.abs(targetFrame - currentFrame) > 0.03) raf = requestAnimationFrame(render);
+      if(!reducedMotion && Math.abs(targetFrame-currentFrame)>0.025) raf=requestAnimationFrame(render);
     }
 
-    function updateFromScroll() {
+    function updateFromScroll(){
       const rect = sequence.getBoundingClientRect();
-      const travel = Math.max(1, sequence.offsetHeight - window.innerHeight);
-      const progress = Math.max(0, Math.min(1, -rect.top / travel));
-      targetFrame = progress * (FRAME_COUNT - 1);
+      const travel = Math.max(1,sequence.offsetHeight-window.innerHeight);
+      const progress = Math.max(0,Math.min(1,-rect.top/travel));
+      targetFrame = progress*(FRAME_COUNT-1);
       progressBar.style.transform = `scaleY(${progress})`;
-      if (!raf) raf = requestAnimationFrame(render);
+      progressLabel.textContent = `${String(Math.round(targetFrame)+1).padStart(2,'0')} / ${FRAME_COUNT}`;
+      if(!raf) raf=requestAnimationFrame(render);
     }
 
-    function loadFrames() {
-      images.forEach((img, i) => {
-        img.onload = () => {
+    function finishLoading(){
+      loader.classList.add('hidden');
+      draw(Math.round(currentFrame));
+    }
+
+    function loadFrames(){
+      loaderText.textContent = `Loading sequence… 0 / ${FRAME_COUNT}`;
+      images.forEach((img,i)=>{
+        img.decoding='async';
+        img.onload=()=>{
           loaded++;
-          loaderText.textContent = `Loading frames… ${loaded} / ${FRAME_COUNT}`;
-          if (loaded === FRAME_COUNT) {
-            loader.classList.add('hidden');
-            currentFrame = 0;
-            targetFrame = 0;
-            draw(0);
-          }
+          loaderText.textContent = loaded===FRAME_COUNT ? 'Ready.' : `Loading sequence… ${loaded} / ${FRAME_COUNT}`;
+          if(loaded===FRAME_COUNT) finishLoading();
         };
-        img.onerror = () => {
-          loaderText.textContent = `Frame ${i + 1} failed to load`;
+        img.onerror=()=>{
+          loaded++;
+          loaderText.textContent = `Loading sequence… ${loaded} / ${FRAME_COUNT}`;
+          if(loaded===FRAME_COUNT) finishLoading();
         };
-        img.src = FRAME_PATH(i + 1);
+        img.src=FRAME_PATH(i+1);
       });
     }
 
-    window.addEventListener('resize', resize, { passive: true });
-    window.addEventListener('scroll', updateFromScroll, { passive: true });
+    document.querySelectorAll('a[href^="#"]').forEach(link=>{
+      link.addEventListener('click',e=>{
+        const target=document.querySelector(link.getAttribute('href'));
+        if(target){e.preventDefault();target.scrollIntoView({behavior:reducedMotion?'auto':'smooth'});}
+      });
+    });
+
+    window.addEventListener('resize',resize,{passive:true});
+    window.addEventListener('scroll',updateFromScroll,{passive:true});
     resize();
     loadFrames();
     updateFromScroll();
