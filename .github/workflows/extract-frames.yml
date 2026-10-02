@@ -19,7 +19,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Find and extract frame ZIP
+      - name: Extract and normalize frames
         shell: bash
         run: |
           set -euo pipefail
@@ -29,30 +29,35 @@ jobs:
 
           if [ ${#zips[@]} -eq 0 ]; then
             echo "No ZIP file found in frames/"
-            exit 0
+            exit 1
           fi
 
-          rm -rf .frame_extract
-          mkdir -p .frame_extract
+          rm -rf .frame_extract frames_web
+          mkdir -p .frame_extract frames_web
 
           for zip_file in "${zips[@]}"; do
             echo "Extracting: $zip_file"
             unzip -o "$zip_file" -d .frame_extract
           done
 
-          find .frame_extract -type f \( \
-            -iname '*.jpg' -o \
-            -iname '*.jpeg' -o \
-            -iname '*.png' \
-          \) -print0 | while IFS= read -r -d '' file; do
-            filename="$(basename "$file")"
-            cp "$file" "frames/$filename"
+          mapfile -d '' files < <(find .frame_extract -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' \) -print0 | sort -z)
+
+          if [ ${#files[@]} -ne 40 ]; then
+            echo "Expected 40 frames, found ${#files[@]}"
+            exit 1
+          fi
+
+          i=1
+          for file in "${files[@]}"; do
+            printf -v output 'frames_web/frame_%04d.jpg' "$i"
+            cp "$file" "$output"
+            i=$((i + 1))
           done
 
           rm -rf .frame_extract
 
-          echo "Extracted frames:"
-          find frames -maxdepth 1 -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' \) | sort
+          echo "Created 40 normalized frames:"
+          ls -lh frames_web/frame_*.jpg
 
       - name: Commit extracted frames
         shell: bash
@@ -62,15 +67,12 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          git add -f frames/*.jpg frames/*.jpeg frames/*.png 2>/dev/null || true
-
-          echo "Staged files:"
-          git diff --cached --name-only
+          git add -f frames_web/
 
           if git diff --cached --quiet; then
-            echo "No new frame files to commit."
+            echo "No frame changes to commit."
             exit 0
           fi
 
-          git commit -m "chore: extract animation frames"
+          git commit -m "chore: extract 40 web animation frames"
           git push
