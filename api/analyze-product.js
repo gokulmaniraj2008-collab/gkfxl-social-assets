@@ -16,7 +16,15 @@ export default async function handler(req, res) {
     });
     const data = await r.json();
     if (!r.ok) return res.status(r.status).json({ code: 'OPENAI_ERROR', detail: data?.error?.message || `OpenAI request failed for model ${model}.` });
-    return res.status(200).json({ text: data.output_text || '' });
+
+    const text = typeof data.output_text === 'string' && data.output_text.trim()
+      ? data.output_text.trim()
+      : (Array.isArray(data.output) ? data.output.flatMap(item => Array.isArray(item.content) ? item.content : []).map(part => part?.text || part?.value || '').filter(Boolean).join('\n').trim() : '');
+
+    if (!text) {
+      return res.status(502).json({ code: 'OPENAI_EMPTY_OUTPUT', detail: 'OpenAI returned a successful response but no text output.', response_id: data.id || null });
+    }
+    return res.status(200).json({ text });
   } catch (e) {
     return res.status(500).json({ code: 'ANALYSIS_FAILED', detail: e?.message || 'Product analysis failed.' });
   }
