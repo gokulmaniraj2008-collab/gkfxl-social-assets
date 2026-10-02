@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - 'frames/*.zip'
+      - 'index.html'
       - '.github/workflows/extract-frames.yml'
   workflow_dispatch:
 
@@ -39,7 +40,6 @@ jobs:
             unzip -o "$zip_file" -d .frame_extract
           done
 
-          # Copy every extracted image into frames/ with a flat, predictable name.
           find .frame_extract -type f \( \
             -iname '*.jpg' -o \
             -iname '*.jpeg' -o \
@@ -62,7 +62,6 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          # Force-add images in case repository-level ignore rules exclude image files.
           git add -f frames/*.jpg frames/*.jpeg frames/*.png 2>/dev/null || true
 
           echo "Staged files:"
